@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:17.6-bookworm
+    container_name: pmservices-db
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8.2.1-bookworm
+    container_name: pmservices-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "no"]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: pmservices-keycloak
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://db:5432/${KC_DB}"
+      KC_DB_USERNAME: ${KC_USER}
+      KC_DB_PASSWORD: ${KC_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    command: ["start-dev"]
+    ports:
+      - "8085:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
