@@ -1,11 +1,37 @@
+# Login Screen (Angular Material)
 
-  # Login Screen Design
+Современный экран аутентификации, собранный на Angular 18 и Angular Material. Интерфейс выполнен в двухколоночном адаптивном макете с акцентом на чистую типографику и стеклянные карточки.
 
-  This is a code bundle for Login Screen Design. The original project is available at https://www.figma.com/design/omxNglBvBTnVv7GTHxzarS/Login-Screen-Design.
+## Стек
 
-  ## Running the code
+- Angular 18 (standalone компоненты)
+- Angular Material с кастомной темой
+- Reactive Forms для валидации полей
+- SCSS (можно подключить и другие препроцессоры при необходимости)
 
-  Run `npm i` to install the dependencies.
+## Запуск
 
-  Run `npm run dev` to start the development server.
-  
+> Требуется установленный Node.js LTS и доступ к npm
+
+```bash
+npm install
+npm start
+```
+
+Сборка для продакшена:
+
+```bash
+npm run build
+```
+
+Запуск тестов:
+
+```bash
+npm test
+```
+
+## Структура
+
+- `src/app/app.component.*` — компонент формы входа и showcase-блока
+- `src/styles.scss` — глобальная тема и фон приложения
+- `src/app/app.config.ts` — провайдеры приложения (анимации и настройки Angular Material)

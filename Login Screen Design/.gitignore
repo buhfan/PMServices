@@ -1,0 +1,11 @@
+# See https://angular.io/guide/setup-local#configure-your-environment
+node_modules
+coverage
+/.angular/cache
+/dist
+
+# IDE
+.vscode
+.idea
+*.iml
+.DS_Store
