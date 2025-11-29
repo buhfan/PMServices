@@ -7,7 +7,7 @@
 
     
     <form class="Auth" (ngSubmit)="onSubmit()" novalidate>
-
+        <mat-card>
         <!-- form-errors: "шапка" ошибок формы.
              role="alert"        → скринридер воспринимает блок как важное сообщение.
              aria-live="polite"  → если текст внутри изменится, скринридер озвучит изменение
@@ -22,36 +22,14 @@
 
         <!-- Один логический "блок поля": label + input + контейнер ошибки -->
         <mat-form-field>
-            <label for="e-mail">E-mail</label>
-
+            <mat-label for="e-mail">E-mail</mat-label>          
+            <input matInput id="e-mail" type="email" name="email" [(ngModel)]="email" placeholder="Email" autocomplete="email" required>       
             
-            <input id="e-mail" type="email" name="email" [(ngModel)]="email" placeholder="Email" autocomplete="email" required aria-describedby="email-error">
-
-           
-            <small id="email-error" class="field-error">
-                <!-- текст ошибки для email добавит JS -->
-            </small>
-        <mat-form-field>
-        
-        </mat-form-field>    
-        <div class="field">
-            <label for="password">Password</label>
-
-            <!-- Тут та же схема: aria-describedby связывает input с контейнером ошибки ниже. -->
-            <input id="password"
-                   type="password"
-                   name="password"
-                   [(ngModel)]="password"
-                   placeholder="Password"
-                   autocomplete="current-password"
-                   minlength="8"
-                   required
-                   aria-describedby="password-error">
-
-            <small id="password-error" class="field-error">
-                <!-- текст ошибки для пароля добавит JS -->
-            </small>
-        </div>
+        </mat-form-field>
+        <mat-form-field>           
+            <mat-label for="password">Password</mat-label><!-- Тут та же схема: aria-describedby связывает input с контейнером ошибки ниже. -->
+            <input matInput id="password" type="password" name="password" [(ngModel)]="password" placeholder="Password" autocomplete="current-password" minlength="8" required>
+                             
         </mat-form-field>
 
         <button type="submit" class="submit" mat-raised-button color="primary">Войти</button>
@@ -61,6 +39,7 @@
             <div class="SSOYandex"></div>
             <div class="SSOMicrosoft"></div>
         </div>
+    </mat-card>
     </form>
 
     <div class="Info">

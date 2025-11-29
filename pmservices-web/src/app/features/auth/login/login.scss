@@ -3,7 +3,7 @@
     grid-template-rows: auto 1fr auto;
     margin: 0;
     min-height: 100svh;
-    background-color: orange;
+    //background-color: orange;
     gap: 0.75rem;
 }
 .Auth {
@@ -14,7 +14,7 @@
     max-width: 100%;
     grid-row: 1;
     grid-column: 2;
-    border: 1px solid black;
+    //border: 1px solid black;
     place-self: start stretch;
 }
 
@@ -23,13 +23,13 @@
     grid-row: 1;
     grid-column: 1;
     height: 100%;
-    border: 1px solid black;
+    //border: 1px solid black;
     place-self: center stretch;
 }
 header {
     display: flex;
     grid-row: 1;
-    border: 1px solid black;
+    //border: 1px solid black;
 }
 
 .content {
@@ -43,5 +43,5 @@ header {
 footer {
     display: flex;
     grid-row: 3;
-    border: 1px solid black;
+    //border: 1px solid black;
 }
