@@ -5,7 +5,7 @@ import { Observable, of, delay } from 'rxjs';
 export class MockAuthService implements AuthService {
   login(request: LoginRequest): Observable<LoginResponse> {
     const response: LoginResponse = {
-      token: 'mock-token-for-' + request.username,
+      token: 'mock-token-for-' + request.email,
     };
 
     return of(response).pipe(delay(300)); // имитация сети

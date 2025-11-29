@@ -1,1 +1,75 @@
-<p>login works!</p>
+
+<mat-toolbar color="primary">
+    header
+</mat-toolbar>
+
+<main class="content">
+
+    
+    <form class="Auth" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- form-errors: "шапка" ошибок формы.
+             role="alert"        → скринридер воспринимает блок как важное сообщение.
+             aria-live="polite"  → если текст внутри изменится, скринридер озвучит изменение
+                                   «мягко», не перебивая пользователя.
+             aria-atomic="true"  → читает блок целиком, а не кусочками. -->
+            
+        <div class="form-errors" role="alert" aria-live="polite" aria-atomic="true"></div>
+            <!-- сюда JS потом будет подставлять общий текст ошибок,
+                 например: "Исправьте ошибки в форме" или "Неверный логин или пароль". -->
+
+        <h1>Войти в PM Services</h1>
+
+        <!-- Один логический "блок поля": label + input + контейнер ошибки -->
+        <mat-form-field>
+            <label for="e-mail">E-mail</label>
+
+            
+            <input id="e-mail" type="email" name="email" [(ngModel)]="email" placeholder="Email" autocomplete="email" required aria-describedby="email-error">
+
+           
+            <small id="email-error" class="field-error">
+                <!-- текст ошибки для email добавит JS -->
+            </small>
+        <mat-form-field>
+        
+        </mat-form-field>    
+        <div class="field">
+            <label for="password">Password</label>
+
+            <!-- Тут та же схема: aria-describedby связывает input с контейнером ошибки ниже. -->
+            <input id="password"
+                   type="password"
+                   name="password"
+                   [(ngModel)]="password"
+                   placeholder="Password"
+                   autocomplete="current-password"
+                   minlength="8"
+                   required
+                   aria-describedby="password-error">
+
+            <small id="password-error" class="field-error">
+                <!-- текст ошибки для пароля добавит JS -->
+            </small>
+        </div>
+        </mat-form-field>
+
+        <button type="submit" class="submit" mat-raised-button color="primary">Войти</button>
+
+        <div class="signup">
+            <div class="SSOGoogle"></div>
+            <div class="SSOYandex"></div>
+            <div class="SSOMicrosoft"></div>
+        </div>
+    </form>
+
+    <div class="Info">
+        Info
+    </div>
+
+</main>
+
+<footer>
+    footer
+</footer>
+

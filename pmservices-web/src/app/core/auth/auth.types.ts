@@ -2,7 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 

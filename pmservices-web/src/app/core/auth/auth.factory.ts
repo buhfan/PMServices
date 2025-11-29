@@ -16,7 +16,8 @@ export function authServiceFactory(
 
   if (USE_MOCK_AUTH) {
     inner = new MockAuthService();
-  } else {
+  } 
+  else {
     inner = new RealAuthService(http);
   }
 
