@@ -8,10 +8,7 @@ import { LoggerService } from '../logger.service';
 // пока флаг жёстко в коде, потом вынесем в environment
 const USE_MOCK_AUTH = true;
 
-export function authServiceFactory(
-  http: HttpClient,
-  logger: LoggerService
-): AuthService {
+export function authServiceFactory(http: HttpClient, logger: LoggerService): AuthService {
   let inner: AuthService;
 
   if (USE_MOCK_AUTH) {
