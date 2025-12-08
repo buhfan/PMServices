@@ -1,0 +1,303 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> # (a) удалить пустой файл, если есть
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> Remove-Item .\audit-versions.ps1 -ErrorAction SilentlyContinue
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops>
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> # (b) создать файл из here-string
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> @'
+>> #requires -Version 5.1
+>> $ErrorActionPreference = "SilentlyContinue"
+>>
+>> function Section($title){ Write-Host "`n=== $title ===" -ForegroundColor Cyan }
+>>
+>> Section "Host tools"
+>> dotnet --info
+>> dotnet --list-sdks
+>> node -v
+>> npm -v
+>> try { ng version } catch { try { npx -y @angular/cli@latest ng version } catch {} }
+>> tsc -v
+>> git --version
+>> docker --version
+>> try { docker compose version } catch { docker-compose --version }
+>>
+>> Section "Angular workspace (package.json)"
+>> # Ищем ближайший package.json фронта (без -Depth, совместимо с Windows PowerShell 5.1)
+>> $pkgCandidates = Get-ChildItem -Path .., . -Recurse -Filter package.json -ErrorAction SilentlyContinue |
+>>   Where-Object { $_.FullName -notmatch "\\node_modules\\" }
+>>
+>> $targetPkg = $null
+>> foreach($p in $pkgCandidates){
+>>   try {
+>>     $json = Get-Content $p.FullName -Raw | ConvertFrom-Json
+>>     if($json.dependencies."@angular/core" -or $json.devDependencies."@angular/cli"){ $targetPkg = $p; break }
+>>   } catch {}
+>> }
+>> if($targetPkg){
+>>   Write-Host "package.json: $($targetPkg.FullName)"
+>>   $json = Get-Content $targetPkg.FullName -Raw | ConvertFrom-Json
+>>   $deps = @("@angular/core","@angular/cli","rxjs","zone.js","typescript","keycloak-js")
+>>   foreach($d in $deps){
+>>     $v = $json.dependencies.$d
+>>     if(-not $v){ $v = $json.devDependencies.$d }
+>>     if($v){ "{0} {1}" -f $d, $v | Write-Host }
+>>   }
+>>   Push-Location $targetPkg.Directory.FullName
+>>   try { npm outdated --depth=0 } catch {}
+>>   Pop-Location
+>> }else{
+>>   Write-Host "Angular package.json not found nearby (skipped)."
+>> }
+>>
+>> Section ".NET packages (outdated)"
+>> Get-ChildItem -Path .., . -Recurse -Filter *.csproj -ErrorAction SilentlyContinue | ForEach-Object {
+>>   try { dotnet list $_.FullName package --outdated } catch {}
+>> }
+>>
+>> Section "Containers (running)"
+>> docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+>> try { docker compose images } catch { try { docker-compose images } catch {} }
+>>
+>> # Версии внутри контейнеров (если запущены)
+>> $kc = docker ps --format "{{.Names}}" | Where-Object { $_ -match "keycloak" }
+>> if ($kc) { try { docker exec $kc /opt/keycloak/bin/kc.sh --version } catch {} }
+>> $pg = docker ps --format "{{.Names}}" | Where-Object { $_ -match "postgres" }
+>> if ($pg) { try { docker exec $pg psql --version; docker exec $pg postgres --version } catch {} }
+>> $rd = docker ps --format "{{.Names}}" | Where-Object { $_ -match "redis" }
+>> if ($rd) { try { docker exec $rd redis-server --version } catch {} }
+>> $mp = docker ps --format "{{.Names}}" | Where-Object { $_ -match "mailpit" }
+>> if ($mp) { try { docker exec $mp mailpit --version } catch {} }
+>> '@ | Set-Content -Path .\audit-versions.ps1 -Encoding UTF8
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops>
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> # (c) убедимся, что файл не пустой
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> Get-Item .\audit-versions.ps1
+
+
+    Directory: C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        19.10.2025     11:15           2621 audit-versions.ps1
+
+
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops> powershell -NoProfile -ExecutionPolicy Bypass -File .\audit-versions.ps1
+
+=== Host tools ===
+ПАКЕТ SDK ДЛЯ .NET:
+ Version:           10.0.100-rc.2.25502.107
+ Commit:            89c8f6a112
+ Workload version:  10.0.100-manifests.4d32cd9e
+ MSBuild version:   18.0.0-preview-25502-107+89c8f6a11
+
+Среда выполнения:
+ OS Name:     Windows
+ OS Version:  10.0.26100
+ OS Platform: Windows
+ RID:         win-x64
+ Base Path:   C:\Program Files\dotnet\sdk\10.0.100-rc.2.25502.107\
+
+Установленные рабочие нагрузки .NET:
+ [maui-windows]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    10.0.0-rc.2.25504.7/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.maui\10.0.0-rc.2.25504.7\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [maccatalyst]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    26.0.10970-net10-rc.2/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.maccatalyst\26.0.10970-net10-rc.2\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [ios]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    26.0.10970-net10-rc.2/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.ios\26.0.10970-net10-rc.2\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [android]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    36.0.0-rc.2.332/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.android\36.0.0-rc.2.332\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [wasm-tools-net6]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    10.0.100-rc.2.25502.107/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.workload.mono.toolchain.net6\10.0.100-rc.2.25502.107\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [wasm-tools-net7]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    10.0.100-rc.2.25502.107/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.workload.mono.toolchain.net7\10.0.100-rc.2.25502.107\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [wasm-tools-net8]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    10.0.100-rc.2.25502.107/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.workload.mono.toolchain.net8\10.0.100-rc.2.25502.107\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [wasm-tools-net9]
+   Источник установки: VS 18.0.11111.16
+   Версия манифеста:    10.0.100-rc.2.25502.107/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.workload.mono.toolchain.net9\10.0.100-rc.2.25502.107\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [wasm-tools]
+   Источник установки: VS 18.0.11111.16, VS 17.14.36401.2
+   Версия манифеста:    10.0.100-rc.2.25502.107/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.workload.mono.toolchain.current\10.0.100-rc.2.25502.107\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [tvos]
+   Источник установки: VS 17.14.36401.2
+   Версия манифеста:    26.0.10970-net10-rc.2/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.tvos\26.0.10970-net10-rc.2\WorkloadManifest.json
+   Тип установки:              Msi
+
+ [macos]
+   Источник установки: VS 17.14.36401.2
+   Версия манифеста:    26.0.10970-net10-rc.2/10.0.100-rc.2
+   Путь к манифесту:       C:\Program Files\dotnet\sdk-manifests\10.0.100-rc.2\microsoft.net.sdk.macos\26.0.10970-net10-rc.2\WorkloadManifest.json
+   Тип установки:              Msi
+
+Настроено на использование workload sets при установке новых манифестов.
+Наборы рабочих нагрузок не установлены. Запустите команду "dotnet workload restore", чтобы установить набор рабочей нагрузки.
+
+Host:
+  Version:      10.0.0-rc.2.25502.107
+  Architecture: x64
+  Commit:       89c8f6a112
+
+.NET SDKs installed:
+  8.0.101 [C:\Program Files\dotnet\sdk]
+  9.0.304 [C:\Program Files\dotnet\sdk]
+  10.0.100-rc.2.25502.107 [C:\Program Files\dotnet\sdk]
+
+.NET runtimes installed:
+  Microsoft.AspNetCore.App 5.0.17 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 6.0.36 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 8.0.1 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 8.0.19 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 8.0.21 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 9.0.8 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 9.0.10 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 10.0.0-rc.2.25502.107 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 5.0.17 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 6.0.36 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 8.0.1 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 8.0.19 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 8.0.21 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 9.0.8 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 9.0.10 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 10.0.0-rc.2.25502.107 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.WindowsDesktop.App 5.0.17 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 6.0.36 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 8.0.1 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 8.0.19 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 8.0.21 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 9.0.8 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 9.0.10 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 10.0.0-rc.2.25502.107 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+
+Other architectures found:
+  x86   [C:\Program Files (x86)\dotnet]
+    registered at [HKLM\SOFTWARE\dotnet\Setup\InstalledVersions\x86\InstallLocation]
+
+Environment variables:
+  Not set
+
+global.json file:
+  Not found
+
+Learn more:
+  https://aka.ms/dotnet/info
+
+Download .NET:
+  https://aka.ms/dotnet/download
+8.0.101 [C:\Program Files\dotnet\sdk]
+9.0.304 [C:\Program Files\dotnet\sdk]
+10.0.100-rc.2.25502.107 [C:\Program Files\dotnet\sdk]
+v22.16.0
+10.9.2
+
+     _                      _                 ____ _     ___
+    / \   _ __   __ _ _   _| | __ _ _ __     / ___| |   |_ _|
+   / △ \ | '_ \ / _` | | | | |/ _` | '__|   | |   | |    | |
+  / ___ \| | | | (_| | |_| | | (_| | |      | |___| |___ | |
+ /_/   \_\_| |_|\__, |\__,_|_|\__,_|_|       \____|_____|___|
+                |___/
+
+
+
+Angular CLI: 20.3.2
+Node: 22.16.0
+Package Manager: npm 10.9.2
+OS: win32 x64
+
+
+Angular: <error>
+
+Package                      Version
+------------------------------------
+@angular-devkit/architect    0.2003.2 (cli-only)
+@angular-devkit/core         20.3.2 (cli-only)
+@angular-devkit/schematics   20.3.2 (cli-only)
+@schematics/angular          20.3.2 (cli-only)
+git version 2.50.1.windows.1
+Docker version 28.3.2, build 578ccf6
+Docker Compose version v2.39.1-desktop.1
+
+=== Angular workspace (package.json) ===
+package.json: C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\bin\Debug\net9.0\pmservices-web\package.json
+@angular/core ^20.3.0
+@angular/cli ^20.3.2
+rxjs ~7.8.0
+zone.js ~0.15.0
+typescript ~5.9.2
+Package                    Current  Wanted  Latest  Location  Depended by
+@angular/common            MISSING  20.3.6  20.3.6  -         pmservices-web
+@angular/compiler          MISSING  20.3.6  20.3.6  -         pmservices-web
+@angular/core              MISSING  20.3.6  20.3.6  -         pmservices-web
+@angular/forms             MISSING  20.3.6  20.3.6  -         pmservices-web
+@angular/platform-browser  MISSING  20.3.6  20.3.6  -         pmservices-web
+@angular/router            MISSING  20.3.6  20.3.6  -         pmservices-web
+rxjs                       MISSING   7.8.2   7.8.2  -         pmservices-web
+tslib                      MISSING   2.8.1   2.8.1  -         pmservices-web
+zone.js                    MISSING  0.15.1  0.15.1  -         pmservices-web
+
+=== .NET packages (outdated) ===
+Восстановление завершено (0,4 с)
+
+Сборка успешно выполнено через 0,8 с
+
+Использовались следующие источники:
+   https://api.nuget.org/v3/index.json
+   C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+
+Проект "PMServices" содержит следующие обновления пакетов
+   [net9.0]:
+   Пакет верхнего уровня               Запрошено   Разрешено   Последние
+   > Microsoft.AspNetCore.OpenApi      9.0.8       9.0.8       9.0.10
+   > Npgsql                            9.0.3       9.0.3       9.0.4
+   > Npgsql.DependencyInjection        9.0.3       9.0.3       9.0.4
+   > Npgsql.Json.NET                   9.0.3       9.0.3       9.0.4
+   > Npgsql.NetTopologySuite           9.0.3       9.0.3       9.0.4
+   > Npgsql.NodaTime                   9.0.3       9.0.3       9.0.4
+   > Npgsql.OpenTelemetry              9.0.3       9.0.3       9.0.4
+
+
+=== Containers (running) ===
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.project%3Dops%22%3Atrue%7D%7D": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+PS C:\Users\89263\Desktop\Project\ProjectPlatform\PMServices\ops>

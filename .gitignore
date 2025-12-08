@@ -16,3 +16,9 @@ npm-debug.log*
 
 # Publish
 wwwroot/lib/
+
+# Angular/Node
+pmservices-web/node_modules/
+pmservices-web/dist/
+pmservices-web/.angular/
+pmservices-web/package-lock.json

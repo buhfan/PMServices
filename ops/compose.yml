@@ -1,4 +1,37 @@
 services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: pmservices-api
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # строка подключения к приложенческой БД
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${APP_DB};Username=${APP_USER};Password=${APP_PASSWORD}"
+      # Redis для кеша/сессий
+      Redis__Configuration: "redis:6379"
+      # Почта через Mailpit (dev)
+      Mail__Smtp__Host: "mailpit"
+      Mail__Smtp__Port: "1025"
+      # Keycloak (потом в appsettings можно под это завести секцию Keycloak)
+      Keycloak__Authority: "http://keycloak:8080/realms/pmservices"
+      Keycloak__ClientId: "pmservices-api"
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      mailpit:
+        condition: service_started
+    networks:
+      - pmservices-net
+
   db:
     image: postgres:17.6-bookworm
     container_name: pmservices-db
@@ -17,6 +50,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - pmservices-net
 
   redis:
     image: redis:8.2.1-bookworm
@@ -25,6 +60,8 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server", "--appendonly", "no"]
+    networks:
+      - pmservices-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -47,6 +84,33 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - pmservices-net
+  
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: pmservices-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - pmservices-net
+
+  web:
+    image: nginx:alpine
+    container_name: pmservices-web
+    restart: unless-stopped
+    volumes:
+      - ../pmservices-web/dist/pmservices-web/browser:/usr/share/nginx/html:ro
+    ports:
+      - "4200:80"
+    networks:
+      - pmservices-net
+  
 
 volumes:
   pgdata:
+
+networks:
+  pmservices-net:

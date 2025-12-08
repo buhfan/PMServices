@@ -28,22 +28,12 @@ namespace PMServices
 
             app.MapControllers();
 
-            app.MapGet("/health/db", async (IConfiguration cfg) =>
+            
+            app.MapGet("/iam-ping", () => Results.Ok(new
             {
-                var cs = cfg.GetConnectionString("DefaultConnection")!;
-                await using var conn = new NpgsqlConnection(cs);
-                await conn.OpenAsync();
-                await using var cmd = new NpgsqlCommand("select 1", conn);
-                var r = await cmd.ExecuteScalarAsync();
-                return r?.ToString() == "1" ? Results.Ok(new { ok = true }) : Results.Problem("DB ping failed");
-            });
-            //app.MapGet("/debug/cs", (IConfiguration cfg) =>
-            //{
-            //    var cs = cfg.GetConnectionString("DefaultConnection") ?? "<null>";
-            //    var safe = System.Text.RegularExpressions.Regex.Replace(cs, "(?i)Password=[^;]*", "Password=***");
-            //    return Results.Ok(new { cs = safe });
-            //});
-
+                Message = "PMServices IAM backend from Docker",
+                Time = DateTime.UtcNow
+            }));
 
             app.Run();
         }

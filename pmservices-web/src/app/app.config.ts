@@ -5,9 +5,9 @@ import { routes } from './app.routes';
 import { HttpClient } from '@angular/common/http';
 import { provideHttpClient } from '@angular/common/http';
 
-import { AUTH_SERVICE } from './core/auth/auth.types';
+/*import { AUTH_SERVICE } from './core/auth/auth.types';
 import { authServiceFactory } from './core/auth/auth.factory';
-import { LoggerService } from './core/logger.service';
+import { LoggerService } from './core/logger.service';*/
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,11 +15,12 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(), // если уже есть — второй раз не добавляй
-    LoggerService,
+    provideHttpClient(),
+    /*LoggerService,
     {
       provide: AUTH_SERVICE,
       useFactory: authServiceFactory,
       deps: [HttpClient, LoggerService],
-    },
+    },*/
   ]
 };

@@ -1,17 +1,39 @@
-// src/app/core/auth/real-auth.service.ts
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthService, LoginRequest, LoginResponse } from './auth.types';
+import { Injectable, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
-export class RealAuthService implements AuthService {
-  constructor(private http: HttpClient) {}
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName?: string;
+}
 
-  login(request: LoginRequest): Observable<LoginResponse> {
-    // TODO: поменяешь на реальный URL API
-    return this.http.post<LoginResponse>('/api/auth/login', request);
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+  private readonly authUrl = environment.authUrl;  
+  readonly isLoggedIn = signal(false);
+  readonly profile = signal<UserProfile | null>(null);
+  readonly orgId = signal<string | null>(null);
+  readonly orgRoles = signal<string[]>([]);
+  readonly permissions = signal<string[]>([]);
+
+  // Заглушки — потом подменим на Keycloak
+  login(): void {
+    // дальше здесь будет redirect на Keycloak
+    console.warn('AuthService.login(): TODO – Keycloak redirect');
   }
 
-  logout(): Observable<void> {
-    return this.http.post<void>('/api/auth/logout', {});
+  logout(): void {
+    // дальше здесь будет вызов Keycloak logout
+    console.warn('AuthService.logout(): TODO – Keycloak logout');
+  }
+
+  loadProfile(): void {
+    // дальше здесь будет вызов /api/auth/me
+    console.warn('AuthService.loadProfile(): TODO – call /api/auth/me');
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.permissions().includes(permission);
   }
 }
