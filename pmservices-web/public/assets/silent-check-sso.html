@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Silent SSO</title>
+  </head>
+  <body>
+    <script>
+      // Ничего не делаем — Keycloak только проверяет сессию
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

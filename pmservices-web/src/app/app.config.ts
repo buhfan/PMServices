@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { HttpClient } from '@angular/common/http';
 import { provideHttpClient } from '@angular/common/http';
-
+import { keycloakProviders } from './core/auth/keycloak.config';
 /*import { AUTH_SERVICE } from './core/auth/auth.types';
 import { authServiceFactory } from './core/auth/auth.factory';
 import { LoggerService } from './core/logger.service';*/
@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(), // если уже есть — второй раз не добавляй
-    provideHttpClient(),
+    ...keycloakProviders,
     /*LoggerService,
     {
       provide: AUTH_SERVICE,
